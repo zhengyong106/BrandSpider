@@ -1,10 +1,14 @@
+import re
+import time
 import scrapy
+from scrapy import log
 from selenium import webdriver
 from scrapy import signals
 from scrapy.http import HtmlResponse
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support import expected_conditions as EC
 
 
 class BrandSpiderMiddleware(object):
@@ -54,58 +58,57 @@ class BrandSpiderMiddleware(object):
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
 
-class SpiderDownloaderMiddleware(object):
-    # Not all methods need to be defined. If a method is not defined,
-    # scrapy acts as if the downloader middleware does not modify the
-    # passed objects.
+class SeleniumDownloaderMiddleware(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        # This method is used by Scrapy to create your spiders.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
 
     def __init__(self):
-        self.browser = webdriver.Chrome("C:\Python37\chromedriver.exe")
+        self.browser = webdriver.Chrome("C:\Python36\chromedriver.exe")
 
     def process_request(self, request, spider):
         # 依靠meta中的标记，来决定是否需要使用selenium来爬取
         use_selenium = request.meta.get('use_selenium', False)
+        element_text = None
         if use_selenium:
             try:
-                self.browser.set_page_load_timeout(5)
+                # 设置脚本加载超时为5秒
+                self.browser.set_script_timeout(5)
+                # 打开请求链接
                 self.browser.get(request.url)
-                locator = (By.XPATH, request.meta["until_xpath"])
-                if locator:
-                    WebDriverWait(self.browser, 10).until(expected_conditions.presence_of_element_located(locator))
+                # 获取请求元数据
+                element_js = request.meta.get("element_js")
+                element_xpath = request.meta.get("element_xpath")
+                element_regex = request.meta.get("element_regex")
 
-            except Exception as e:
-                return HtmlResponse(url=request.url, status=500, request=request)
+                if element_js:
+                    self.browser.execute_script(element_js)
+
+                # 依靠Xpath表达式作为预期条件，等待直到元素加载完成
+                if element_xpath:
+                    locator = (By.XPATH, element_xpath)
+                    element = WebDriverWait(self.browser, 2).until(EC.presence_of_element_located(locator), "预期条件[%s] 等待加载超时：URL %s" %(element_xpath, request.url))
+                    element_text = element.text
+                    # 依靠正则表达式作为预期条件，等待直到元素加载完成
+                    if element_regex:
+                        element_compile = re.compile(element_regex)
+                        WebDriverWait(self.browser, 10).until(lambda driver: element_compile.search(element.text), "预期条件[%s] 等待加载超时：URL %s" %(element_xpath, request.url))
+                        # 休息两秒后再获取元素值
+                        time.sleep(2)
+                        element_text = element_compile.search(element.text).group(1)
+
+            except TimeoutException as e:
+                log.msg(e.msg, log.ERROR)
+                return HtmlResponse(url=request.url, request=request, status=500)
             else:
+                request.meta["element_text"] = element_text
                 return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8', status=200)
 
-    def process_response(self, request, response, spider):
-        # Called with the response returned from the downloader.
-
-        # Must either;
-        # - return a Response object
-        # - return a Request object
-        # - or raise IgnoreRequest
-        return response
-
-    def process_exception(self, request, exception, spider):
-        # Called when a download handler or a process_request()
-        # (from other downloader middleware) raises an exception.
-
-        # Must either:
-        # - return None: continue processing this exception
-        # - return a Response object: stops process_exception() chain
-        # - return a Request object: stops process_exception() chain
-        pass
-
     def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
+        pass
 
 class SeleniumRequest(scrapy.Request):
 

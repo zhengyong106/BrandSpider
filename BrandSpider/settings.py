@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import random
 
 # Scrapy settings for Spider project
 #
@@ -9,32 +10,29 @@
 #     https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
+# 指定爬虫机器人名
 BOT_NAME = 'BrandSpider'
 
+# 指定爬虫模块
 SPIDER_MODULES = ['BrandSpider.spiders']
 NEWSPIDER_MODULE = 'BrandSpider.spiders'
 
+# 指定Scrapy输出日志级别
+LOG_LEVEL = 'INFO'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'Spider (+http://www.yourdomain.com)'
+# 指定下载延时
+DOWNLOAD_DELAY = random.randint(1, 3)
 
-# Obey robots.txt rules
+# 指定浏览器请求头
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+
+# 指定是否启用机器人协议
 ROBOTSTXT_OBEY = False
 
-# 添加splash服务器地址：
-SPLASH_URL = 'http://192.168.99.100:8050'
-
-# 将splash middleware添加到DOWNLOADER_MIDDLEWARE中：
-DOWNLOADER_MIDDLEWARES = {
-'BrandSpider.middlewares.SpiderDownloaderMiddleware': 543,
-'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
-}
-
-SPIDER_MIDDLEWARES = {
-'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
-}
-DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
-HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+# 启用Scrapy下载中间件
+# DOWNLOADER_MIDDLEWARES = {
+# 'BrandSpider.middlewares.SeleniumDownloaderMiddleware': 543,
+# }
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -42,8 +40,6 @@ HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-import random
-DOWNLOAD_DELAY = random.randint(1, 3)
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -55,9 +51,9 @@ DOWNLOAD_DELAY = random.randint(1, 3)
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-DEFAULT_REQUEST_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
-}
+# DEFAULT_REQUEST_HEADERS = {
+#   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+# }
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
@@ -67,9 +63,7 @@ DEFAULT_REQUEST_HEADERS = {
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'Spider.middlewares.SpiderDownloaderMiddleware': 543,
-#}
+
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
