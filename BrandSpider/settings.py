@@ -18,10 +18,10 @@ SPIDER_MODULES = ['BrandSpider.spiders']
 NEWSPIDER_MODULE = 'BrandSpider.spiders'
 
 # 指定Scrapy输出日志级别
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'DEBUG'
 
 # 指定下载延时
-DOWNLOAD_DELAY = random.randint(1, 3)
+# DOWNLOAD_DELAY = random.randint(1, 3)
 
 # 指定浏览器请求头
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
@@ -30,9 +30,20 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 ROBOTSTXT_OBEY = False
 
 # 启用Scrapy下载中间件
-# DOWNLOADER_MIDDLEWARES = {
-# 'BrandSpider.middlewares.SeleniumDownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    'BrandSpider.middlewares.SeleniumDownloaderMiddleware': 1000,
+}
+
+# 启用管道中间件
+ITEM_PIPELINES = {
+   'BrandSpider.pipelines.BrandSpiderPipeline': 300,
+}
+
+# Mysql配置
+MYSQL_URL = "www.wecloud.store"
+MYSQL_USERNAME = "root"
+MYSQL_PASSWORD = "106Xiaokang."
+MYSQL_DB = "Spider"
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -92,8 +103,8 @@ ROBOTSTXT_OBEY = False
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
-#HTTPCACHE_ENABLED = True
-#HTTPCACHE_EXPIRATION_SECS = 0
+# HTTPCACHE_ENABLED = True
+# HTTPCACHE_EXPIRATION_SECS = 60 * 60 * 20
+# HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
-#HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
